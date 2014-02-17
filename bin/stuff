@@ -1,0 +1,15 @@
+Todo:
+
+Emitter and Particle share a lot of the same methods,
+but they are in different packages and don't share a base class
+
+Add different types of Emitters and take all the fireworks stuff out
+of the Emitters class. maybe something like FireEmitter or RainEmitter would be cool
+
+Addative blending
+
+TextureMapping the particles
+
+try out some Post-processing, like motion blur
+
+gravity wells, maybe place those with right mouse clicks
