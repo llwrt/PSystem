@@ -11,17 +11,11 @@ public class Screen {
 
 	public int WIDTH, HEIGHT;
 	public int[][] pixels;
-	GaussianFilter gb = new GaussianFilter();
 
 	public Screen(int width, int height) {
 		WIDTH = width;
 		HEIGHT = height;
 		pixels = new int[WIDTH][HEIGHT];
-	}
-	
-	
-	public void blur(BufferedImage src){
-		gb.filter(src, src);
 	}
 
 	public void drawOntoImage(BufferedImage img){
