@@ -35,6 +35,10 @@ public class Vector2D {
 		this.y = v.y;
 	}
 
+	public Vector2D(Vector2D location, Vector2D origin) {
+		this(location.x, location.y, origin.x, origin.y);
+	}
+
 	public String toString(){
 		return String.format("x:%f y:%f", x, y);
 	}

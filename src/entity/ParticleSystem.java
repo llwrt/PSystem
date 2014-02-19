@@ -1,24 +1,25 @@
 package entity;
 import imaging.Screen;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Random;
 
 import math.Vector2D;
+import entity.Emitter.Type;
 
 
 public class ParticleSystem {
 	
 	private static BufferedImage IMG; // Don't edit this
 	private static Screen screen;
-	private ArrayList<Drawable> drawables = new ArrayList<Drawable>();
+	private ArrayList<Drawable> drawables = new ArrayList<Drawable>(); // TODO
 	private ArrayList<Particle> Particles = new ArrayList<Particle>();
 	private ArrayList<Emitter> Emitters = new ArrayList<Emitter>();
 	Random r = new Random();
 	Vector2D gravity = new Vector2D(0, .1);
+	public Particle.Type type = Particle.Type.Firework;
 
 	public ParticleSystem(Screen s) {
 		screen = s;
@@ -26,7 +27,7 @@ public class ParticleSystem {
 	}
 	
 	public synchronized void update(int milliseconds_since_last_update){
-		//System.out.println("current particles: " + Particles.size());
+		//System.out.println("particles: " + Particles.size() + " emitters:" + Emitters.size());
 		for(Particle p : Particles){
 			p.update(milliseconds_since_last_update, screen);
 			p.draw(screen);
@@ -40,27 +41,38 @@ public class ParticleSystem {
 	}
 
 	private synchronized void removeDeadEmitters() {
+		// particles get to decide when they are dead or not. just clean up if they mark themselves.
 		for(int i=0; i<Emitters.size(); i++)
-			if(Emitters.get(i).isDead() || !screen.onScreen(Emitters.get(i).mover.location))
+			if(Emitters.get(i).isDead())
 				Emitters.remove(i);
 	}
 
 	private synchronized void removeDeadParticles() {
+		// particles get to decide when they are dead or not.  just clean up if they mark themselves.
 		for(int i=0; i<Particles.size(); i++)
-			if(Particles.get(i).isDead() )//|| !screen.onScreen(Particles.get(i).mover.location))
+			if(Particles.get(i).isDead())
 				Particles.remove(i);
 	}
 
 	public void render(Graphics2D g) {
 		screen.drawOntoImage(IMG);
 		g.drawImage(IMG , 0, 0, screen.WIDTH, screen.HEIGHT, null);
-		//screen.clear(0x000000); // black
 		screen.dim();
 	}
 
-	public synchronized void spawnEmitter(Emitter.Type type, Vector2D location, int n) {
-		for(int i=0; i<n; i++)
-			Emitters.add(new Emitter(type, new Vector2D(location), Particles, Emitters));
+	public synchronized void spawnEmitter(Emitter.Type type, Vector2D location) {
+		if(type == Emitter.Type.Firework){
+			Emitters.add(new FireworkEmitter(type, new Vector2D(location), Particles, Emitters));
+		}
+		else if (type == Emitter.Type.Mouse){
+			Emitters.add(new MouseEmitter(Type.Mouse, new Vector2D(location), Particles, Emitters));
+		}
+	}
+
+	public synchronized void clear() {
+		// get rid of all particles, emitters, etc
+		Particles = new ArrayList<Particle>();
+		Emitters = new ArrayList<Emitter>();
 	}
 
 	

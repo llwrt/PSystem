@@ -2,8 +2,6 @@ package imaging;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.WritableRaster;
 
 import math.Vector2D;
 
@@ -38,7 +36,7 @@ public class Screen {
 	public void dim(){
 		for(int x=0; x<HEIGHT; x++){
 			for(int y=0; y<WIDTH; y++){
-				pixels[x][y] = lowerAlpha(pixels[x][y]);
+				pixels[x][y] = BlendRGB.subtractColors(pixels[x][y], 0xFF090909);
 			}
 		}
 	}
@@ -52,9 +50,13 @@ public class Screen {
 	}
 
 	public boolean onScreen(Vector2D location){
-		if(location.x < 0 || location.x >= WIDTH)
+		return onScreen(location.x, location.y);
+	}
+	
+	public boolean onScreen(double x, double y){
+		if(x < 0 || x >= WIDTH)
 			return false;
-		if(location.y < 0 || location.y >= HEIGHT)
+		if(y < 0 || y >= HEIGHT)
 			return false;
 		return true;
 	}

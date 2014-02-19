@@ -35,7 +35,7 @@ public class RandomGenerator {
 		return r.nextInt(n);
 	}
 	
-	private static Color RED_WHITE_BLUE[] = {Color.RED, Color.WHITE, new Color(0xFF3A7FFF)};
+	private static Color RED_WHITE_BLUE[] = {new Color(0xFFEE2035), new Color(0xFFFCFCFC), new Color(0xFF3A7FFF)};
 	public static Color redWhiteOrBlue(){
 		return RED_WHITE_BLUE[r.nextInt(3)];
 	}
