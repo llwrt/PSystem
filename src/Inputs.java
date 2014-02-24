@@ -37,7 +37,7 @@ public class Inputs implements KeyListener, MouseListener, MouseMotionListener{
 
 	public void keyPressed(KeyEvent e) {
 		if(e.getKeyCode() == KeyEvent.VK_SPACE)
-			PS.clear();
+			PS.togglePause();
 	}
 	public void keyReleased(KeyEvent e) {}
 	public void keyTyped(KeyEvent e) {}
@@ -55,10 +55,9 @@ public class Inputs implements KeyListener, MouseListener, MouseMotionListener{
 			return;
 		}
 		if(e.getButton() == MouseEvent.BUTTON1){
-			PS.spawnEmitter(Emitter.Type.Firework, new Vector2D(e.getX(), e.getY()));
+			PS.spawn(new Vector2D(e.getX(), e.getY()));
 		} else{
-			for(int i=0; i<15; i++)
-				PS.spawnEmitter(Emitter.Type.Firework, new Vector2D(e.getX(), e.getY()));
+			
 		}
 	}
 	

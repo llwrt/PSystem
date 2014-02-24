@@ -25,28 +25,34 @@ public class Main implements Runnable{
 	private JFrame frame = new JFrame("Particle System");
 	private Canvas canvas = new Canvas();
 	private BufferStrategy bufferStrategy;
-	private ParticleSystem ps;
-	private Menus Menu = new Menus();
 	private boolean running = true;
 	private Screen screen = new Screen(WIDTH, HEIGHT);
-	private Inputs input;
+	private ParticleSystem ps = new ParticleSystem(screen);
+	private Menus Menu = new Menus();
+	private Inputs input = new Inputs(canvas, ps, Menu);
 
 	public Main(){
+		setUpFrame();
+		setUpCanvas();
+	}
+	
+	public void setUpCanvas(){
+		canvas.setBounds(0, 0, WIDTH, HEIGHT);
+		canvas.setIgnoreRepaint(true);
+		canvas.createBufferStrategy(2);
+		bufferStrategy = canvas.getBufferStrategy();
+		canvas.requestFocus();
+	}
+	
+	public void setUpFrame(){
 		JPanel panel = (JPanel) frame.getContentPane();
 		panel.setPreferredSize(new Dimension(WIDTH, HEIGHT));
 		panel.setLayout(null);
-		canvas.setBounds(0, 0, WIDTH, HEIGHT);
-		canvas.setIgnoreRepaint(true);
 		panel.add(canvas);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.pack();
 		frame.setResizable(false);
 		frame.setVisible(true);
-		canvas.createBufferStrategy(2);
-		bufferStrategy = canvas.getBufferStrategy();
-		canvas.requestFocus();
-		ps = new ParticleSystem(screen);
-		input = new Inputs(canvas, ps, Menu);
 	}
 
 	public void run(){
@@ -62,11 +68,13 @@ public class Main implements Runnable{
 			// paint 
 			render();
 			
-			// update
+			// update particles
 			lastUpdateTime = currentUpdateTime;
 			currentUpdateTime = System.nanoTime();
 			millis_since_last_update = (int) ((currentUpdateTime - lastUpdateTime)/(1000*1000));
 			update(millis_since_last_update);
+			
+			// calculate fps
 			update_count++;
 			second_ticker += millis_since_last_update;
 			if(second_ticker >= 1000){ // if a second has passed
@@ -92,7 +100,6 @@ public class Main implements Runnable{
 		Graphics2D g = (Graphics2D) bufferStrategy.getDrawGraphics();
 		g.clearRect(0, 0, WIDTH, HEIGHT);
 		render(g);
-		Menu.drawMenus(g, WIDTH, HEIGHT, (int)calculatedFPS, ps.type.toString());
 		g.dispose();
 		bufferStrategy.show();
 	}
@@ -102,7 +109,9 @@ public class Main implements Runnable{
 	}
 	
 	protected void render(Graphics2D g){
+		// screen should be copied to graphics2D here
 		ps.render(g);
+		Menu.drawMenus(g, WIDTH, HEIGHT, (int) calculatedFPS, ps.type.toString());
 	}
 	
 	public static void main(String [] args){

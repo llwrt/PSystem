@@ -10,8 +10,13 @@ import math.Vector2D;
 public class Particle {
 
 	public enum Type{
-		Firework, FireworkStrand;
-		public String toString(){ return "Firework";}
+		Firework, Rain, Bouncer;
+		public String toString(){
+			if(this == Firework){ return "Firework"; }
+			if(this == Rain){ return "Rain"; }
+			if(this == Bouncer){ return "Bouncer"; }
+			return "Unknown Particle Type";
+		}
 	}
 	
 	public Vector2D origin;

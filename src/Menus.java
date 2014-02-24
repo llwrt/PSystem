@@ -19,10 +19,11 @@ public class Menus {
 	}
 	
 	protected void drawMenus(Graphics2D g, int WIDTH, int HEIGHT, int fps, String type){
+		
 		if(show_fps){
 			g.setColor(Color.WHITE);
 			g.drawString("FPS: " + fps, 10, 35);
-			g.drawString("Particle Type: " + type, 10, 20); // + ps.ParticleType
+			g.drawString("Particle Type: " + type, 10, 20); // + ps.ParticleType 
 		}
 		if(show_help){
 			// TODO: this only looks good for 600x600, so maybe fix that

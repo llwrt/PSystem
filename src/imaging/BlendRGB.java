@@ -69,7 +69,14 @@ public class BlendRGB {
 	}
 	
 	public static void multiply(int[] pixels, int width, int height){
-		
+	}
+	
+	// takes a double between 0-1 and decreases all color channels by that percentage
+	public static int multiply(double amount, int color) {
+		int red = (int) ((color >> 16 & 0x000000FF) * amount);
+		int green = (int) ((color >> 8 & 0x000000FF) * amount);
+		int blue = (int) ((color & 0x000000FF) * amount);
+		return makeColor(red,green,blue);
 	}
 
 	public static void overlay(int[] pixels, int width, int height){

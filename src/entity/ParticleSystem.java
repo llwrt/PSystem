@@ -14,12 +14,12 @@ public class ParticleSystem {
 	
 	private static BufferedImage IMG; // Don't edit this
 	private static Screen screen;
-	private ArrayList<Drawable> drawables = new ArrayList<Drawable>(); // TODO
 	private ArrayList<Particle> Particles = new ArrayList<Particle>();
 	private ArrayList<Emitter> Emitters = new ArrayList<Emitter>();
 	Random r = new Random();
 	Vector2D gravity = new Vector2D(0, .1);
 	public Particle.Type type = Particle.Type.Firework;
+	private boolean paused = false;
 
 	public ParticleSystem(Screen s) {
 		screen = s;
@@ -27,6 +27,7 @@ public class ParticleSystem {
 	}
 	
 	public synchronized void update(int milliseconds_since_last_update){
+		if (paused) return;
 		//System.out.println("particles: " + Particles.size() + " emitters:" + Emitters.size());
 		for(Particle p : Particles){
 			p.update(milliseconds_since_last_update, screen);
@@ -57,15 +58,15 @@ public class ParticleSystem {
 	public void render(Graphics2D g) {
 		screen.drawOntoImage(IMG);
 		g.drawImage(IMG , 0, 0, screen.WIDTH, screen.HEIGHT, null);
-		screen.dim();
+		//screen.dim(); // or screen.clear() if you don't want motion blur
+		if(!paused){
+			screen.dim();
+		}
 	}
 
 	public synchronized void spawnEmitter(Emitter.Type type, Vector2D location) {
 		if(type == Emitter.Type.Firework){
-			Emitters.add(new FireworkEmitter(type, new Vector2D(location), Particles, Emitters));
-		}
-		else if (type == Emitter.Type.Mouse){
-			Emitters.add(new MouseEmitter(Type.Mouse, new Vector2D(location), Particles, Emitters));
+			Emitters.add(new Firework(new Vector2D(location), Particles, Emitters));
 		}
 	}
 
@@ -73,6 +74,16 @@ public class ParticleSystem {
 		// get rid of all particles, emitters, etc
 		Particles = new ArrayList<Particle>();
 		Emitters = new ArrayList<Emitter>();
+	}
+
+	public synchronized void spawn(Vector2D location) {
+		if(type == Particle.Type.Firework){
+			Emitters.add(new Firework(location, Particles, Emitters));
+		}
+	}
+
+	public void togglePause() {
+		this.paused = !paused;
 	}
 
 	

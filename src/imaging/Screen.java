@@ -17,7 +17,7 @@ public class Screen {
 	}
 
 	public void drawOntoImage(BufferedImage img){
-		//blur(img);
+		//int[][] bloom = bloom();
 		for(int x=0; x<WIDTH; x++){
 			for(int y=0; y<HEIGHT; y++){
 				img.setRGB(x, y, pixels[x][y]);
@@ -36,7 +36,7 @@ public class Screen {
 	public void dim(){
 		for(int x=0; x<HEIGHT; x++){
 			for(int y=0; y<WIDTH; y++){
-				pixels[x][y] = BlendRGB.subtractColors(pixels[x][y], 0xFF090909);
+				pixels[x][y] = BlendRGB.subtractColors(pixels[x][y], 0xFF0F0F0F);
 			}
 		}
 	}
@@ -59,6 +59,52 @@ public class Screen {
 		if(y < 0 || y >= HEIGHT)
 			return false;
 		return true;
+	}
+	
+	private int[][] blur(int[][] pixlels){
+		// if this is too slow, blur a smaller version of pixels. 
+		// no need to allocate new array. just (for x=0; x<width/2; x+2) ignor half the pixels
+		int width = pixels.length;
+		int height = pixels[0].length;
+		int[][] blurred = new int[width][height];
+		
+		// blurr in x direction on every row
+		for(int x=0; x<width; x++){
+			for(int y=0; y<height; y++){
+				if(x>2 && x<(width-3)){
+					blurred[x][y] += 
+							BlendRGB.multiply(.4, pixels[x][y]) 
+							+ BlendRGB.multiply(.3, pixels[x-1][y])
+							+ BlendRGB.multiply(.3, pixels[x+1][y]);
+					//blurred[x][y] = (int) ((.6 * pixels[x][y]) + (.2 * pixels[x-1][y]) + (.2 * pixels[x+1][y]));
+				}
+			}
+		}
+		// blur in y direction on every column
+		for(int x=0; x<width; x++){
+			for(int y=0; y<height; y++){
+				if(y>2 && y<(width-3)){
+					blurred[x][y] += 
+							BlendRGB.multiply(.4, pixels[x][y]) 
+							+ BlendRGB.multiply(.3, pixels[x][y-1])
+							+ BlendRGB.multiply(.3, pixels[x][y+1]);
+					//blurred[x][y] += (int) ((.6 * pixels[x][y]) + (.2 * pixels[x][y-1]) + (.2 * pixels[x][y+1]));
+				}
+			}
+		}
+		
+		return blurred;
+	}
+
+	public int[][] bloom() {
+		int[][] blur = blur(pixels);
+		int[][] blur2 = blur(blur);
+		for(int x=0; x<WIDTH; x++){
+			for(int y=0; y<HEIGHT; y++){
+				blur2[x][y] = BlendRGB.addColors(pixels[x][y], blur[x][y]);
+			}
+		}
+		return blur;
 	}
 
 }

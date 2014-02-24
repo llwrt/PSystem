@@ -9,7 +9,7 @@ import math.RandomGenerator;
 public class FireworkParticle extends Particle{
 
 	public FireworkParticle(Movable m, Color c) {
-		super(new Movable(m), RandomGenerator.nextInt(100), c, RandomGenerator.nextInt(2)+1);
+		super(new Movable(m), RandomGenerator.nextInt(20), c, RandomGenerator.nextInt(3)+1);
 	}
 	
 	public FireworkParticle(Movable m) {
@@ -17,7 +17,6 @@ public class FireworkParticle extends Particle{
 	}
 
 	public void update(int milliseconds_since_last_update, Screen s){
-		//this.color = color.darker();
 		super.update(milliseconds_since_last_update, s);
 	}
 	

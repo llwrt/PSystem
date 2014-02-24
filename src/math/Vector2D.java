@@ -24,10 +24,8 @@ public class Vector2D {
 		y = y + v.y;
 	}
 	
-	public void dot(Vector2D v){
-	}
-	
-	public void cross(Vector2D v){
+	public double dotProduct(Vector2D v){
+		return x*v.x + y*v.y;
 	}
 
 	public Vector2D(Vector2D v){
