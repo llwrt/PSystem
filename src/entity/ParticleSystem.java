@@ -1,52 +1,49 @@
 package entity;
 import imaging.Screen;
 
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
+import java.awt.Color;
 import java.util.ArrayList;
-import java.util.Random;
+import java.util.LinkedList;
 
+import math.RandomGenerator;
 import math.Vector2D;
-import entity.Emitter.Type;
 
 
 public class ParticleSystem {
+		
+	// this is a buffer for emitters to add particles to the system while the system is updating.
+	// once per update, the particles are moved from this buffer to the main Particles list.
+	private ArrayList<Particle> PendingParticles = new ArrayList<Particle>();
 	
-	private static BufferedImage IMG; // Don't edit this
-	private static Screen screen;
 	private ArrayList<Particle> Particles = new ArrayList<Particle>();
-	private ArrayList<Emitter> Emitters = new ArrayList<Emitter>();
-	Random r = new Random();
-	Vector2D gravity = new Vector2D(0, .1);
-	public Particle.Type type = Particle.Type.Firework;
-	private boolean paused = false;
+	
+	private LinkedList<String> Type;
+	
+	private Vector2D MousePos = new Vector2D(0, 0);
+	
 
-	public ParticleSystem(Screen s) {
-		screen = s;
-		IMG = new BufferedImage(screen.WIDTH, screen.HEIGHT, 1);
+	public ParticleSystem() {
+		Type = new LinkedList<String>(); 
+		Type.add("Firework");
+		Type.add("Water");
+		Type.add("Rain");
+		Type.add("Snow");
+		Type.add("Followers");
+		Type.add("Repellers");
 	}
 	
-	public synchronized void update(int milliseconds_since_last_update){
-		if (paused) return;
-		//System.out.println("particles: " + Particles.size() + " emitters:" + Emitters.size());
+	public synchronized void update(int milliseconds_since_last_update, Screen s){
 		for(Particle p : Particles){
-			p.update(milliseconds_since_last_update, screen);
-			p.draw(screen);
-		}
-		for(Emitter e : Emitters){
-			e.update(milliseconds_since_last_update);
-			e.draw(screen);
+			p.update(milliseconds_since_last_update, s);
 		}
 		removeDeadParticles();
-		removeDeadEmitters();
+		
+		// pending particles are particles that are added during this update method by emitters
+		for(Particle p : PendingParticles)
+			Particles.add(p);
+		PendingParticles.clear();
 	}
 
-	private synchronized void removeDeadEmitters() {
-		// particles get to decide when they are dead or not. just clean up if they mark themselves.
-		for(int i=0; i<Emitters.size(); i++)
-			if(Emitters.get(i).isDead())
-				Emitters.remove(i);
-	}
 
 	private synchronized void removeDeadParticles() {
 		// particles get to decide when they are dead or not.  just clean up if they mark themselves.
@@ -55,37 +52,74 @@ public class ParticleSystem {
 				Particles.remove(i);
 	}
 
-	public void render(Graphics2D g) {
-		screen.drawOntoImage(IMG);
-		g.drawImage(IMG , 0, 0, screen.WIDTH, screen.HEIGHT, null);
-		//screen.dim(); // or screen.clear() if you don't want motion blur
-		if(!paused){
-			screen.dim();
-		}
-	}
-
-	public synchronized void spawnEmitter(Emitter.Type type, Vector2D location) {
-		if(type == Emitter.Type.Firework){
-			Emitters.add(new Firework(new Vector2D(location), Particles, Emitters));
-		}
+	public synchronized void render(Screen s) {
+		for(Particle p : Particles)
+			p.draw(s);
 	}
 
 	public synchronized void clear() {
-		// get rid of all particles, emitters, etc
-		Particles = new ArrayList<Particle>();
-		Emitters = new ArrayList<Emitter>();
+		Particles.clear();
+		PendingParticles.clear();
 	}
 
-	public synchronized void spawn(Vector2D location) {
-		if(type == Particle.Type.Firework){
-			Emitters.add(new Firework(location, Particles, Emitters));
-		}
+	public void spawnFirework(Vector2D location) {
+		int spawnCount = 3; // number of fireworks per click
+		for(int i=0; i<spawnCount; i++)
+			PendingParticles.add(new Firework(new Vector2D(location), this));
 	}
 
-	public void togglePause() {
-		this.paused = !paused;
+	public void spawnFireworkParticle(Movable m, Color color) {
+		// one single ray of light that eminates from a firework. Fireworks spawn hundreds of these
+		PendingParticles.add(new Particle(m, RandomGenerator.nextInt(20), color));
 	}
 
+	public void spawnParticle(Vector2D location){
+		if(Type.peek() == "Firework"){
+			spawnFirework(location);
+		} else if(Type.peek() == "Water"){
+			spawnWater(location);
+		} else if(Type.peek() == "Followers"){
+			spawnFollowers(location);
+		} else if(Type.peek() == "Rain"){
+			spawnRain(location);
+		} 
+	}
 	
+	
+	
+	private void spawnRain(Vector2D location) {
+		
+	}
 
+	private synchronized void spawnFollowers(Vector2D location) {
+		for(int i=0; i<300; i++) // each click spawns 3 followers
+			PendingParticles.add(new FollowerParticle(location, this));
+	}
+
+	private synchronized void spawnWater(Vector2D location) {
+		PendingParticles.add(new WaterEmitter(location, this));
+	}
+	
+	public synchronized void spawnRaindrop(Movable m){
+		PendingParticles.add(new WaterDrop(m));
+	}
+
+	public synchronized void changeParticle() {
+		Type.addLast(Type.pop()); // move current particle type to back of queue
+		clear(); // remove all particles on screen when changing types
+	}
+
+	public String getParticleType(){
+		return Type.peek();
+	}
+
+	public void setMouse(int x, int y) {
+		MousePos.x = x;
+		MousePos.y = y;
+	}
+	
+	public Vector2D getMouse(){
+		return new Vector2D(MousePos);
+	}
+	
 }

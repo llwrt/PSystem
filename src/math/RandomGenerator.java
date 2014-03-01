@@ -13,11 +13,21 @@ public class RandomGenerator {
 		return new Color(r.nextFloat(), r.nextFloat(), r.nextFloat());
 	}
 	
-	public Vector2D randomVector(int high){ 
+	public static Vector2D randomVector(int high){ 
 		return randomVector(0, high);
 	}
 	
-	public Vector2D randomVector(int low, int high){
+	public static Vector2D raindropVector(){
+		// spread slightly positive and negative
+		double x_velocity = r.nextDouble() * (r.nextInt(4)+1);
+		if(r.nextBoolean()) x_velocity *= -1;
+		
+		// little variance, all downwards
+		double y_velocity = r.nextDouble() * (r.nextInt(6));
+		return new Vector2D(x_velocity, y_velocity);
+	}
+	
+	public static Vector2D randomVector(int low, int high){
 		double angle = r.nextDouble() * 360; // random double between 0 and 360
 		double magnitude = (r.nextDouble() * (high - low)) + low; // random double between [low, high]
 		return new Vector2D(Math.cos(angle) * magnitude, Math.sin(angle) * magnitude);
@@ -35,12 +45,15 @@ public class RandomGenerator {
 		return r.nextInt(n);
 	}
 	
-	private static Color RED_WHITE_BLUE[] = {new Color(0xFFEE2035), new Color(0xFFFCFCFC), new Color(0xFF3A7FFF)};
-	public static Color redWhiteOrBlue(){
-		return RED_WHITE_BLUE[r.nextInt(3)];
-	}
-	
 	public static Color rainbowColor(){
 		return Color.getHSBColor(r.nextFloat(), 0.9f, 1.0f);
+	}
+	
+	private static int[] rainColors = {
+		0xFFA5D8F2, 0xFF099FEB, 0xFF076EA3, 0xFF053852, 0xFF5E95F2, 0xFF1060EB, 
+		0xFF0540A6, 0xFF052B6B, 0xFF4055F5, 0xFF0016BD };
+	
+	public static Color rainColor(){
+		return new Color(rainColors[r.nextInt(rainColors.length)]);
 	}
 }

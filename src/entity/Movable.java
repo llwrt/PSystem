@@ -7,9 +7,9 @@ public class Movable {
 	public Vector2D location, velocity, acceleration;
 	
 	public Movable(Vector2D loc, Vector2D vel, Vector2D acc){
-		location = loc;
-		velocity = vel;
-		acceleration = acc;
+		location = new Vector2D(loc);
+		velocity = new Vector2D(vel);
+		acceleration = new Vector2D(acc);
 	}
 
 	public Movable(Movable m) {
@@ -19,12 +19,14 @@ public class Movable {
 	}
 
 	public void update() {
-		location.add(velocity);
+		//System.out.println("updating mover:" + this);
 		velocity.add(acceleration);
+		location.add(velocity);
+		//System.out.println("updated:" + this);
 	}
 	
 	public String toString(){
-		return String.format("loc(%f,%f); vel(%f,%f); acc(%f,%f);\n", 
+		return String.format("loc(%f,%f); vel(%f,%f); acc(%f,%f);", 
 				location.x, location.y, 
 				velocity.x, velocity.y, 
 				acceleration.x, acceleration.y);

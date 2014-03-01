@@ -1,5 +1,4 @@
 package entity;
-import imaging.BlendRGB;
 import imaging.Screen;
 
 import java.awt.Color;
@@ -8,39 +7,28 @@ import java.util.Random;
 import math.Vector2D;
 
 public class Particle {
-
-	public enum Type{
-		Firework, Rain, Bouncer;
-		public String toString(){
-			if(this == Firework){ return "Firework"; }
-			if(this == Rain){ return "Rain"; }
-			if(this == Bouncer){ return "Bouncer"; }
-			return "Unknown Particle Type";
-		}
-	}
 	
-	public Vector2D origin;
-	public Movable mover;
-	int life, size;
+	protected Vector2D origin, previousloc;
+	protected Movable mover;
+	private int life;
 	Color color;
 	public boolean dead = false;
+	protected boolean kill_offscreen = true;
 	Random r = new Random();
-	private boolean BouncesOffWalls = false;
+	protected boolean BouncesOffWalls = false;
+	public static Vector2D ZeroVector = new Vector2D(0, 0);
+	public static Vector2D GravityVector = new Vector2D(0, .3);
 
-	public Particle(Movable m, int _life, Color _color, int s){
-		size = s;
+	public Particle(Movable m, int _life, Color _color){
 		mover = m;
 		life = _life;
 		color = _color;
 		origin = new Vector2D(m.location);
+		previousloc = origin;
 	}
 	
-	public Particle(Movable m, int _life, Color _color){
-		size = 1;
-		mover = m;
-		life = _life;
-		color = _color;
-		origin = new Vector2D(m.location);
+	public Particle(Movable m){
+		this(m, Integer.MAX_VALUE, Color.WHITE); // assumes longest life, color is white
 	}
 
 	private void bounce(Screen s){
@@ -67,30 +55,22 @@ public class Particle {
 	
 	public void update(int milliseconds_since_last_update, Screen s){
 		if(BouncesOffWalls){ bounce(s); }
-		if(!onScreen(s)){ dead = true; }
-		
+		if(kill_offscreen && !onScreen(s)){ dead = true; }
+		previousloc = new Vector2D(mover.location);
 		mover.update();
+		
 		if (life <= 0) { dead = true; }
 		else { life--; }
 	}
-
+	
 	public void draw(Screen screen) {
-		// maybe instead of drawing just the particle, draw a line between current and last positions 
-		int current_screen_value = 0;
-		int extra = size/2;
-		
-		// for exery pixel in the particle texture
-		for(int i=0 - extra; i<size; i++){
-			for(int j=0-extra; j<size; j++){
-				// see if its location is on the screen
-				int curr_x = (int) (mover.location.x + i);
-				int curr_y = (int) (mover.location.y + j);
-				if(screen.onScreen(curr_x, curr_y)){
-					// paint it to the screen 
-					current_screen_value = screen.pixels[curr_x][curr_y];
-					screen.pixels[curr_x][curr_y] = BlendRGB.addColors(current_screen_value, this.color.getRGB());
-				}
-			}
+		if(screen.onScreen(this.mover.location) && screen.onScreen(previousloc)){
+			screen.drawline(
+					(int)mover.location.x, 
+					(int)mover.location.y, 
+					(int)previousloc.x, 
+					(int)previousloc.y, 
+					this.color.getRGB());
 		}
 	}
 
@@ -102,5 +82,8 @@ public class Particle {
 		return dead;
 	}
 	
+	public String toString(){
+		return String.format("mover:%s\n dead:%b\n", mover, dead);
+	}
 	
 }

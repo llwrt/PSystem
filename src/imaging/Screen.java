@@ -9,6 +9,7 @@ public class Screen {
 
 	public int WIDTH, HEIGHT;
 	public int[][] pixels;
+	private boolean MotionBlur = true;
 
 	public Screen(int width, int height) {
 		WIDTH = width;
@@ -17,12 +18,15 @@ public class Screen {
 	}
 
 	public void drawOntoImage(BufferedImage img){
-		//int[][] bloom = bloom();
 		for(int x=0; x<WIDTH; x++){
 			for(int y=0; y<HEIGHT; y++){
 				img.setRGB(x, y, pixels[x][y]);
 			}
 		}
+		if(MotionBlur)
+			dim();
+		else
+			clear(0x00000000);
 	}
 
 	public int lowerAlpha(int color){
@@ -36,7 +40,7 @@ public class Screen {
 	public void dim(){
 		for(int x=0; x<HEIGHT; x++){
 			for(int y=0; y<WIDTH; y++){
-				pixels[x][y] = BlendRGB.subtractColors(pixels[x][y], 0xFF0F0F0F);
+				pixels[x][y] = BlendRGB.subtractColors(pixels[x][y], 0xFF3F3F3F);
 			}
 		}
 	}
@@ -54,11 +58,7 @@ public class Screen {
 	}
 	
 	public boolean onScreen(double x, double y){
-		if(x < 0 || x >= WIDTH)
-			return false;
-		if(y < 0 || y >= HEIGHT)
-			return false;
-		return true;
+		return (x>=0 && x<WIDTH && y>=0 && y<HEIGHT);
 	}
 	
 	private int[][] blur(int[][] pixlels){
@@ -105,6 +105,46 @@ public class Screen {
 			}
 		}
 		return blur;
+	}
+	
+	public void toggleMotionBlur() {
+		MotionBlur = !MotionBlur;
+	}
+	
+	public void drawLine(int x1, int y1, int x2, int y2){
+		drawline(x1, y1, x2, y2, 0xFFFFFFFF);
+	}
+
+	
+	public void drawline(int x,int y,int x2, int y2, int color) {
+		//System.out.printf("from %d,%d to %d,%d\n", x, y, x2, y2);
+	    int w = x2 - x ;
+	    int h = y2 - y ;
+	    int dx1 = 0, dy1 = 0, dx2 = 0, dy2 = 0 ;
+	    if (w<0) dx1 = -1 ; else if (w>0) dx1 = 1 ;
+	    if (h<0) dy1 = -1 ; else if (h>0) dy1 = 1 ;
+	    if (w<0) dx2 = -1 ; else if (w>0) dx2 = 1 ;
+	    int longest = Math.abs(w) ;
+	    int shortest = Math.abs(h) ;
+	    if (!(longest>shortest)) {
+	        longest = Math.abs(h) ;
+	        shortest = Math.abs(w) ;
+	        if (h<0) dy2 = -1 ; else if (h>0) dy2 = 1 ;
+	        dx2 = 0 ;            
+	    }
+	    int numerator = longest >> 1 ;
+	    for (int i=0;i<=longest;i++) {
+	        pixels[x][y] = BlendRGB.addColors(pixels[x][y], color);
+	        numerator += shortest ;
+	        if (!(numerator<longest)) {
+	            numerator -= longest ;
+	            x += dx1 ;
+	            y += dy1 ;
+	        } else {
+	            x += dx2 ;
+	            y += dy2 ;
+	        }
+	    }
 	}
 
 }

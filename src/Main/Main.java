@@ -1,19 +1,15 @@
+package Main;
 import imaging.Screen;
 
 import java.awt.Canvas;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferStrategy;
+import java.awt.image.BufferedImage;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import math.Vector2D;
-import entity.Emitter;
 import entity.ParticleSystem;
 
 public class Main implements Runnable{
@@ -27,13 +23,15 @@ public class Main implements Runnable{
 	private BufferStrategy bufferStrategy;
 	private boolean running = true;
 	private Screen screen = new Screen(WIDTH, HEIGHT);
-	private ParticleSystem ps = new ParticleSystem(screen);
+	private static BufferedImage IMG;
+	private ParticleSystem ps = new ParticleSystem();
 	private Menus Menu = new Menus();
 	private Inputs input = new Inputs(canvas, ps, Menu);
 
 	public Main(){
 		setUpFrame();
 		setUpCanvas();
+		IMG = new BufferedImage(WIDTH,HEIGHT,1);  // temporary buffer for screen to draw to
 	}
 	
 	public void setUpCanvas(){
@@ -87,14 +85,15 @@ public class Main implements Runnable{
 		}
 	}
 	
-	private static void sleep(long loop_duration, long target){
-		// if running faster than target, sleep for one update
-		if(loop_duration <= target){
-			try{Thread.sleep((target - loop_duration)/(1000*1000));}
-			catch(InterruptedException e){}
-		}
+	private static void sleep(long loop_duration, long loop_target){
+		if(loop_duration <= loop_target) // if running faster than target, sleep for one update
+			sleep((loop_target - loop_duration)/(1000*1000));
 	}
-
+	
+	private static void sleep(long nanoseconds){
+		try{Thread.sleep(nanoseconds);}
+		catch(InterruptedException e){}
+	}
 	
 	private void render() {
 		Graphics2D g = (Graphics2D) bufferStrategy.getDrawGraphics();
@@ -105,13 +104,15 @@ public class Main implements Runnable{
 	}
 
 	protected void update(int milliseconds_since_last_update){
-		ps.update(milliseconds_since_last_update);
+		ps.update(milliseconds_since_last_update, screen);
+		// maybe turn motion blur on here
 	}
 	
 	protected void render(Graphics2D g){
-		// screen should be copied to graphics2D here
-		ps.render(g);
-		Menu.drawMenus(g, WIDTH, HEIGHT, (int) calculatedFPS, ps.type.toString());
+		ps.render(screen);
+		screen.drawOntoImage(IMG);
+		g.drawImage(IMG , 0, 0, screen.WIDTH, screen.HEIGHT, null);
+		Menu.drawMenus(g, WIDTH, HEIGHT, (int) calculatedFPS, ps.getParticleType());
 	}
 	
 	public static void main(String [] args){
